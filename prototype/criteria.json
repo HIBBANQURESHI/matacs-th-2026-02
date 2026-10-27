@@ -1,0 +1,66 @@
+{
+  "category": "Commercial Solar Installation",
+  "criteria_version": 1,
+  "project": {
+    "budget_ceiling_cad": 260000,
+    "max_weeks": 16,
+    "evaluation_date": "2026-10-28"
+  },
+  "mandatory": [
+    {
+      "id": "licence",
+      "label": "Ontario electrical contractor licence held by the bidder",
+      "rule": "bidder_holds_ontario_licence == true AND licence_number present"
+    },
+    {
+      "id": "wsib_insurance",
+      "label": "WSIB clearance and $5M liability insurance",
+      "rule": "wsib_clearance == true AND liability_insurance_cad >= 5000000"
+    }
+  ],
+  "weighted": [
+    {
+      "id": "experience",
+      "weight": 30,
+      "scale": "linear",
+      "input": "qualifying_installs",
+      "full_marks_at": 12,
+      "zero_at": 0,
+      "note": "Commercial installs >= 100 kW within the last 5 years"
+    },
+    {
+      "id": "price",
+      "weight": 25,
+      "scale": "linear",
+      "input": "total_price_cad",
+      "full_marks_at": 182000,
+      "zero_at": 260000,
+      "note": "Full marks at 70% of ceiling or less, zero at the ceiling"
+    },
+    {
+      "id": "timeline",
+      "weight": 15,
+      "scale": "linear",
+      "input": "completion_weeks",
+      "full_marks_at": 8,
+      "zero_at": 16,
+      "note": "Full marks at 8 weeks or less, zero at 16 weeks; missing = 0"
+    },
+    {
+      "id": "warranty",
+      "weight": 15,
+      "scale": "composite",
+      "parts": [
+        { "input": "panel_warranty_years", "share": 0.5, "full_marks_at": 25 },
+        { "input": "workmanship_warranty_years", "share": 0.5, "full_marks_at": 12 }
+      ]
+    },
+    {
+      "id": "team_approach",
+      "weight": 15,
+      "scale": "checklist",
+      "items": ["named_project_lead", "crew_defined", "safety_plan", "performance_monitoring"],
+      "note": "Each item worth an equal share"
+    }
+  ]
+}
