@@ -7,7 +7,7 @@ output/extracted.json in the same shape as fixtures/extracted.json.
 
 Usage:
     pip install -r requirements.txt
-    cp .env.example .env   # add your key
+    cp .env.example .env   # add your free Gemini key (https://aistudio.google.com/apikey)
     python extract.py
     python score.py output/extracted.json
 """
@@ -18,10 +18,11 @@ import os
 import re
 from pathlib import Path
 
-import anthropic
+from google import genai
+from google.genai import types
 
 HERE = Path(__file__).parent
-MODEL = "claude-opus-5-5"
+DEFAULT_MODEL = "gemini-2.5-flash"
 INJECTION_PATTERNS = [
     r"ignore (all |any )?previous", r"automated review", r"rank (it|this|us) first",
     r"full marks", r"pre-?approved", r"note to (the )?(ai|reviewer|system)",
@@ -114,30 +115,34 @@ def verify(result, body):
     return result
 
 
-def extract_one(client, criteria, path):
+def extract_one(client, model, criteria, path):
     body = path.read_text(encoding="utf-8")
-    response = client.beta.messages.create(
-        model=MODEL,
-        max_tokens=16000,
-        betas=["server-side-fallback-2026-07-01"],
-        fallbacks="default",
-        output_config={"effort": "low",
-                       "format": {"type": "json_schema", "schema": output_schema(criteria)}},
-        system=system_prompt(),
-        messages=[{"role": "user", "content": user_prompt(criteria, path.stem, path.name, body)}],
+    config = types.GenerateContentConfig(
+        system_instruction=system_prompt(),
+        temperature=0,   # as repeatable as the model allows
+        seed=7,
+        response_mime_type="application/json",
+        response_json_schema=output_schema(criteria),
     )
-    if response.stop_reason != "end_turn":
-        raise RuntimeError(f"{path.name}: stopped with {response.stop_reason}; send to reviewer")
-    text = next(block.text for block in response.content if block.type == "text")
-    result = verify(json.loads(text), body)
+    prompt = user_prompt(criteria, path.stem, path.name, body)
+    for attempt in (1, 2):   # retry once, then hand to the reviewer
+        response = client.models.generate_content(model=model, contents=prompt, config=config)
+        try:
+            result = json.loads(response.text)
+            break
+        except (TypeError, json.JSONDecodeError):
+            if attempt == 2:
+                raise RuntimeError(f"{path.name}: no valid JSON after retry; send to reviewer")
+    result = verify(result, body)
     result["proposal"] = path.stem
+    usage = response.usage_metadata
     result["_audit"] = {
-        "model": response.model,
+        "model": model,
         "source_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
         "criteria_version": criteria["criteria_version"],
         "prompt_sha256": hashlib.sha256(system_prompt().encode("utf-8")).hexdigest(),
-        "usage": {"input_tokens": response.usage.input_tokens,
-                  "output_tokens": response.usage.output_tokens},
+        "usage": {"input_tokens": usage.prompt_token_count if usage else None,
+                  "output_tokens": usage.candidates_token_count if usage else None},
     }
     return result
 
@@ -148,8 +153,14 @@ def main():
     files = sorted((HERE / "samples").glob("*.txt"))
     if not files:
         raise SystemExit("Put proposal text files in prototype/samples/ (A.txt ... E.txt)")
-    client = anthropic.Anthropic()
-    results = [extract_one(client, criteria, path) for path in files]
+    if not os.environ.get("GEMINI_API_KEY"):
+        raise SystemExit("Set GEMINI_API_KEY in prototype/.env (see .env.example)")
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    model = os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+    results = []
+    for path in files:
+        print(f"Extracting {path.name} with {model}...")
+        results.append(extract_one(client, model, criteria, path))
     out_dir = HERE / "output"
     out_dir.mkdir(exist_ok=True)
     (out_dir / "extracted.json").write_text(

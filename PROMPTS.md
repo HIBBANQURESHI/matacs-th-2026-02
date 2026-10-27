@@ -4,7 +4,7 @@ The tool uses AI for **one job only: reading each proposal and pulling out facts
 
 Each proposal goes in its own separate call, so one proposal can never affect how another is read.
 
-- **Model:** `claude-opus-5-5`, effort `low` (this is a reading task, not a reasoning task)
+- **Model:** `gemini-2.5-flash` (free tier is enough for this reading task), `temperature: 0` and a fixed `seed`, so runs are as repeatable as the model allows
 - **Output:** forced to the JSON schema below (structured output). If the reply doesn't fit the schema, it is rejected and retried once, then sent to a person.
 - **Where the values come from:** `{{...}}` placeholders are filled by code from the admin's criteria record for the category. The admin never edits prompt text directly.
 

@@ -31,7 +31,23 @@ AI reads each proposal and pulls out facts, each with a quote from the PDF. Plai
 - [prototype/criteria.json](prototype/criteria.json): the admin's criteria for this category as data (fields, mandatory checks, weights, scales)
 - [prototype/score.py](prototype/score.py): deterministic checks, scoring and ranking. Runs with no API key:
   `python prototype/score.py` → prints the ranking, from [prototype/fixtures/extracted.json](prototype/fixtures/extracted.json) (the expected AI extraction for A–E)
-- [prototype/extract.py](prototype/extract.py): sends each proposal to Claude using the prompt in PROMPTS.md (it reads the prompt from that file, so there's one source of truth) and runs the quote and number checks. Needs `pip install -r prototype/requirements.txt` and a key in `prototype/.env` (see [.env.example](prototype/.env.example)). Proposal text goes in `prototype/samples/` (git-ignored, since the brief asks that proposal text not be committed). **I did not run this against the live API.** The fixture file is my hand-checked expected output.
+- [prototype/extract.py](prototype/extract.py): sends each proposal to Google Gemini using the prompt in PROMPTS.md (it reads the prompt from that file, so there's one source of truth), then runs the quote and number checks
+- [prototype/compare.py](prototype/compare.py): compares a live AI extraction with the expected answers and lists any differences
+
+**Run it**
+
+```bash
+cd prototype
+python score.py                         # offline: ranking from the expected extraction, no key needed
+
+pip install -r requirements.txt         # live AI run, needs a free Gemini key
+cp .env.example .env                    # then put your key in .env (https://aistudio.google.com/apikey)
+# put the five proposal texts in samples/A.txt ... samples/E.txt (git-ignored: the brief
+# asks that proposal text is not committed)
+python extract.py                       # AI extraction  -> output/extracted.json
+python compare.py                       # check the AI against the expected answers
+python score.py output/extracted.json   # ranking from the AI's extraction
+```
 
 ## How I used AI tools
 
