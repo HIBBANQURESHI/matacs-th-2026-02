@@ -1,17 +1,3 @@
-"""AI extraction step (the only step that calls a model).
-
-Reads each proposal text file in samples/ (not committed: put the text of
-proposals A-E there as A.txt ... E.txt), sends it with the prompt from
-PROMPTS.md, runs the code checks from PROMPTS.md section 4, and writes
-output/extracted.json in the same shape as fixtures/extracted.json.
-
-Usage:
-    pip install -r requirements.txt
-    cp .env.example .env   # add your free Gemini key (https://aistudio.google.com/apikey)
-    python extract.py
-    python score.py output/extracted.json
-"""
-
 import hashlib
 import json
 import os
@@ -95,6 +81,22 @@ def normalise(text):
     return re.sub(r"\s+", " ", text).strip().lower()
 
 
+NUMBER_WORDS = {w: i for i, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen "
+    "fifteen sixteen seventeen eighteen nineteen twenty".split())}
+
+
+def numbers_in(quote):
+    """Every number a quote states: '$238,000' -> 238000, '$5M' -> 5000000, 'eight' -> 8."""
+    found = set()
+    for amount, suffix in re.findall(r"(\d[\d,]*(?:\.\d+)?)\s*([kKmM](?![a-zA-Z]))?", quote):
+        number = float(amount.replace(",", ""))
+        number *= {"k": 1_000, "m": 1_000_000}.get(suffix.lower(), 1)
+        found.add(number)
+    found.update(NUMBER_WORDS[w] for w in re.findall(r"[a-z]+", quote.lower()) if w in NUMBER_WORDS)
+    return found
+
+
 def verify(result, body):
     """Code checks from PROMPTS.md section 4. Marks fields the reviewer must look at."""
     source = normalise(body)
@@ -104,8 +106,7 @@ def verify(result, body):
             field["status"] = "unverified"
         value = field.get("value")
         if quote and isinstance(value, (int, float)) and not isinstance(value, bool):
-            digits = re.sub(r"[^\d]", "", quote)
-            if str(int(value)) not in digits and field["status"] != "unverified":
+            if value not in numbers_in(quote) and field["status"] != "unverified":
                 # e.g. "12 months" converted to 52 weeks: keep, but send to reviewer
                 field["status"] = "ambiguous"
     for pattern in INJECTION_PATTERNS:

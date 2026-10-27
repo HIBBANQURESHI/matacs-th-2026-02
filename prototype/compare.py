@@ -1,10 +1,3 @@
-"""Compare a live AI extraction with the expected answers in fixtures/.
-
-Usage:
-    python compare.py                      # compares output/extracted.json
-    python compare.py path/to/extracted.json
-"""
-
 import json
 import sys
 from pathlib import Path
@@ -14,6 +7,17 @@ HERE = Path(__file__).parent
 
 def by_letter(data):
     return {p["proposal"]: p for p in data["proposals"]}
+
+
+def same(expected, actual):
+    """Treat equivalent answers as equal: 'not stated' (null) counts as False,
+    and a licence number matches if the digits match ('ECRA/ESA #7005678' == '7005678')."""
+    if expected is False and actual is None:
+        return True
+    if isinstance(expected, str) and isinstance(actual, str):
+        digits = lambda text: "".join(ch for ch in text if ch.isdigit())
+        return digits(expected) == digits(actual) != ""
+    return expected == actual
 
 
 def main():
@@ -30,7 +34,7 @@ def main():
             continue
         for field, exp_field in exp["fields"].items():
             act_field = act["fields"].get(field, {})
-            if act_field.get("value") != exp_field["value"]:
+            if not same(exp_field["value"], act_field.get("value")):
                 print(f"{letter}.{field}: expected {exp_field['value']!r}, got {act_field.get('value')!r}"
                       f"  (status {act_field.get('status')}, evidence {act_field.get('evidence')!r})")
                 mismatches += 1

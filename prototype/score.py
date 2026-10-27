@@ -1,15 +1,3 @@
-"""Deterministic scoring and ranking.
-
-Takes the admin criteria (criteria.json) and the AI extraction output
-(fixtures/extracted.json or the output of extract.py) and produces the
-ranking in ranking.json format. No AI is used here: the same inputs always
-give the same output.
-
-Usage:
-    python score.py                       # uses fixtures/extracted.json
-    python score.py path/to/extracted.json
-"""
-
 import json
 import sys
 from pathlib import Path
