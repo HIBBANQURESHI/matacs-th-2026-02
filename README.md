@@ -51,7 +51,4 @@ python score.py output/extracted.json   # ranking from the AI's extraction
 
 ## How I used AI tools
 
-<!-- TODO: rewrite in your own words, 2-3 sentences, and add a real example of
-where you disagreed with or corrected the AI. Do not submit this placeholder. -->
-
-I used Claude (Claude Code) to help draft the files, the prototype scripts and the diagram, and I reviewed and edited every part myself. **Where I disagreed with the AI:** TODO, describe a real correction you made. Some options: a scoring scale you changed; whether D should be ranked or flagged; whether C's weekly progress reports should count as monitoring.
+I used Claude Code following my instructions: it generated the diagram, the JSON files (criteria, expected extraction, ranking), and first drafts of the write-up, prompt and prototype scripts, which I reviewed, ran and directed changes to. **Where I corrected the AI:** it first wired the extractor to Anthropic's paid API; I had it switched to Gemini's free tier. When I ran the live test, the output wrongly flagged correct values like "$5M" insurance and "eight installs" as ambiguous, because the AI's number check didn't understand "M" or numbers written as words. I had that check fixed. The same run showed Gemini correctly flagging that "since 2021" may partly fall outside the 5-year window, which the AI's expected answers had missed.
