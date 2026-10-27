@@ -6,6 +6,21 @@
     "max_weeks": 16,
     "evaluation_date": "2026-10-28"
   },
+  "extraction_fields": [
+    { "id": "bidder_holds_ontario_licence", "type": "boolean", "instruction": "Does the bidder itself state that it holds an Ontario electrical contractor licence?" },
+    { "id": "licence_number", "type": "string", "instruction": "The licence number as written (e.g. ECRA/ESA number)." },
+    { "id": "wsib_clearance", "type": "boolean", "instruction": "Does the proposal confirm current WSIB clearance?" },
+    { "id": "liability_insurance_cad", "type": "number", "instruction": "Amount of commercial general liability insurance stated, in CAD." },
+    { "id": "qualifying_installs", "type": "integer", "instruction": "Number of commercial solar installations of 100 kW or more completed in the 5 years before the evaluation date. Use \"ambiguous\" if the stated period starts before that window." },
+    { "id": "total_price_cad", "type": "number", "instruction": "Total price in CAD. Note in notes if anything (permits, utility connection) is excluded." },
+    { "id": "completion_weeks", "type": "number", "instruction": "Committed time from award to completion, in weeks. Null if not committed." },
+    { "id": "panel_warranty_years", "type": "number", "instruction": "Panel / manufacturer warranty in years." },
+    { "id": "workmanship_warranty_years", "type": "number", "instruction": "Workmanship warranty in years." },
+    { "id": "named_project_lead", "type": "boolean", "instruction": "Is a specific project lead named or identified now (not \"to be assigned\")?" },
+    { "id": "crew_defined", "type": "boolean", "instruction": "Is the crew size or make-up stated?" },
+    { "id": "safety_plan", "type": "boolean", "instruction": "Is a site safety plan included?" },
+    { "id": "performance_monitoring", "type": "boolean", "instruction": "Is ongoing performance monitoring of the installed system offered? Project progress reports alone do not count." }
+  ],
   "mandatory": [
     {
       "id": "licence",

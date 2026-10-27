@@ -89,6 +89,10 @@ def evaluate(proposal, criteria):
         where = ", ".join(e["location"] for e in proposal["embedded_instructions"])
         result["flags"].append(f"contains instructions aimed at the AI reviewer ({where}); ignored")
 
+    unverified = [k for k, f in fields.items() if f["status"] == "unverified"]
+    if unverified:
+        result["flags"].append(f"evidence quote not found in source for {', '.join(unverified)}")
+
     for criterion in criteria["weighted"]:
         result["breakdown"][criterion["id"]] = score_criterion(criterion, fields)
     result["score"] = round(sum(result["breakdown"].values()), 1)
