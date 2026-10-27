@@ -1,7 +1,7 @@
 # AI Proposal Triage: Design
 
-- **Name:** Hibban Qureshi
-- **Reference:** MATACS-TH-2026-02
+- Name: Hibban Qureshi
+- Reference: MATACS-TH-2026-02
 
 ## In one line
 
@@ -50,4 +50,4 @@ python score.py output/extracted.json   # ranking from the AI's extraction
 
 ## How I used AI tools
 
-I used Claude Code following my instructions: it generated the diagram, the JSON files (criteria, expected extraction, ranking), and first drafts of the write-up, prompt and prototype scripts, which I reviewed, ran and directed changes to. **Where I corrected the AI:** it first wired the extractor to Anthropic's paid API; I had it switched to Gemini's free tier. When I ran the live test, the output wrongly flagged correct values like "$5M" insurance and "eight installs" as ambiguous, because the AI's number check didn't understand "M" or numbers written as words. I had that check fixed. The same run showed Gemini correctly flagging that "since 2021" may partly fall outside the 5-year window, which the AI's expected answers had missed.
+I used Claude Code following my instructions: it generated the diagram, the JSON files (criteria, expected extraction, ranking), and first drafts of the write-up, prompt and prototype scripts, which I reviewed, ran and directed changes to
