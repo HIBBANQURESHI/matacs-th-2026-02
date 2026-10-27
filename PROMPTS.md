@@ -1,5 +1,3 @@
-# Prompts
-
 The tool uses AI for **one job only: reading each proposal and pulling out facts with evidence.** The AI does not score, rank or decide eligibility. Those steps are plain code (see [WRITEUP.md](WRITEUP.md)).
 
 Each proposal goes in its own separate call, so one proposal can never affect how another is read.

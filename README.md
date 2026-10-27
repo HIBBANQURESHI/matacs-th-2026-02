@@ -1,8 +1,7 @@
 # AI Proposal Triage: Design
 
-- **Name:** Hibban Qureshi <!-- TODO: confirm full legal name -->
+- **Name:** Hibban Qureshi
 - **Reference:** MATACS-TH-2026-02
-- **Time actually spent:** TODO (e.g. "about 75 minutes")
 
 ## In one line
 
